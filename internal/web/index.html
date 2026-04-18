@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Wishlist Public View</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; line-height: 1.6; }
+        .item { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 4px; }
+        .booked { background: #eee; text-decoration: line-through; }
+        button { cursor: pointer; background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1 id="title">Loading...</h1>
+    <p id="desc"></p>
+    <div id="items"></div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('t'); // Ссылка вида /index.html?t=abc123
+
+        async function load() {
+            if (!token) { document.body.innerHTML = 'No token provided'; return; }
+            const res = await fetch(`/share/${token}`);
+            if (!res.ok) { alert('Wishlist not found'); return; }
+            const data = await res.json();
+            
+            document.getElementById('title').innerText = data.info.title;
+            document.getElementById('desc').innerText = data.info.description;
+            
+            const container = document.getElementById('items');
+            container.innerHTML = data.items.map(i => `
+                <div class="item ${i.is_booked ? 'booked' : ''}">
+                    <strong>${i.title}</strong> (Priority: ${i.priority})<br>
+                    ${i.description} <br>
+                    <a href="${i.link}" target="_blank">Link</a><br>
+                    ${i.is_booked ? 'Already Booked' : `<button onclick="book(${i.id})">Book It</button>`}
+                </div>
+            `).join('');
+        }
+
+        async function book(id) {
+            const res = await fetch(`/share/${token}/book/${id}`, { method: 'POST' });
+            if (res.ok) { location.reload(); } else { alert('Error booking item'); }
+        }
+
+        load();
+    </script>
+</body>
+</html>
