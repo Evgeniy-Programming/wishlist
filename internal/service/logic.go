@@ -15,11 +15,11 @@ import (
 )
 
 type Svc struct {
-	repo   *repository.Repo
+	repo   repository.Store
 	jwtKey []byte
 }
 
-func New(r *repository.Repo, secret string) *Svc {
+func New(r repository.Store, secret string) *Svc {
 	return &Svc{repo: r, jwtKey: []byte(secret)}
 }
 

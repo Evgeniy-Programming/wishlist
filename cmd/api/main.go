@@ -18,8 +18,21 @@ import (
 	"wishlist-api/internal/handler"
 	"wishlist-api/internal/repository"
 	"wishlist-api/internal/service"
+
+	_ "wishlist-api/docs" // Важно: путь к сгенерированным докам
+
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
+// @title Wishlist API
+// @version 1.0
+// @description Сервис для создания списков желаний.
+// @host localhost:8080
+// @BasePath /
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func main() {
 	db, err := sqlx.Connect("postgres", os.Getenv("DB_DSN"))
 	if err != nil {
@@ -33,6 +46,7 @@ func main() {
 	h := handler.New(svc)
 
 	r := chi.NewRouter()
+	r.Get("/swagger/*", httpSwagger.WrapHandler)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
